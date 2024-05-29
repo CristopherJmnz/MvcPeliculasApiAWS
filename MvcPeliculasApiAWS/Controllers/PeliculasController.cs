@@ -7,9 +7,11 @@ namespace MvcPeliculasApiAWS.Controllers
     public class PeliculasController:Controller
     {
         private readonly PeliculasService service;
-        public PeliculasController(PeliculasService service)
+        private ServiceStorageS3 serviceS3;
+        public PeliculasController(PeliculasService service, ServiceStorageS3 serviceS3)
         {
             this.service = service;
+            this.serviceS3 = serviceS3;
         }
 
         public async Task<IActionResult> Index()
@@ -18,7 +20,7 @@ namespace MvcPeliculasApiAWS.Controllers
             return View(pelis);
         }
 
-        public async Task<IActionResult> PeliculasActor()
+        public IActionResult PeliculasActor()
         {
             return View();
         }
@@ -39,11 +41,16 @@ namespace MvcPeliculasApiAWS.Controllers
             return View();
         }
         [HttpPost]
-        public async Task<IActionResult> Create(Pelicula peli)
+        public async Task<IActionResult> Create(Pelicula peli,IFormFile foto)
         {
             Pelicula peliNew = await this.service.CreatePeliculaAsync
                 (peli.Genero, peli.Titulo, peli.Argumento,
-                peli.Foto, peli.Actores, peli.Youtube, peli.Precio);
+                foto.FileName, peli.Actores, peli.Youtube, peli.Precio);
+            using (Stream stream = foto.OpenReadStream())
+            {
+                await this.serviceS3.UploadFileAsync
+                    (foto.FileName, stream);
+            }
             return RedirectToAction("Index");
         }
 

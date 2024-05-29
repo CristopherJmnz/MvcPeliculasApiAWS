@@ -2,6 +2,7 @@
 
 @{
     ViewData["Title"] = "Details";
+    string BucketUrl = configuration.GetValue<string>("AWS:S3BucketUrl");
 }
 
 <h1>Details</h1>
@@ -32,7 +33,7 @@
             @Html.DisplayNameFor(model=>model.Foto);
         </dt>
         <dd class = "col-sm-10">
-            <img src="~/img/@Model.Foto" />
+            <img src="@BucketUrl@Model.Foto" />
         </dd>
         <dt class = "col-sm-2">
             @Html.DisplayNameFor(model => model.Argumento)
